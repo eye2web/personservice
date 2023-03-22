@@ -2,14 +2,13 @@ package eye2web.personservice.personservice.controller;
 
 import eye2web.personservice.personservice.model.response.PersonResponse;
 import eye2web.personservice.personservice.service.PersonService;
+import eye2web.personservice.personservice.util.Base64Utils;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,11 +36,25 @@ public class PersonsController {
     public ResponseEntity<String> getPersonListAsBas64CSV() {
         final var personList = personService.getPersonsWith3ChildrenOneBelowAge18();
         final var csv = personService.convertToCSV(personList);
-        return ResponseEntity.ok(toBase64(csv));
+        return ResponseEntity.ok(Base64Utils.Encode(csv));
     }
 
-    private String toBase64(final String input) {
-        return Base64.getEncoder().encodeToString(input.getBytes());
+    @PostMapping
+    public ResponseEntity<PersonResponse> createPerson() {
+
+        throw new NotYetImplementedException();
+    }
+
+    @PutMapping
+    public ResponseEntity<PersonResponse> updatePerson() {
+
+        throw new NotYetImplementedException();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deletePerson() {
+
+        throw new NotYetImplementedException();
     }
 
 }

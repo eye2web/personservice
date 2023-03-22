@@ -1,10 +1,7 @@
 package eye2web.personservice.personservice.model;
 
 import eye2web.personservice.personservice.model.dao.PersonEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,10 +13,15 @@ import java.util.Optional;
 @Builder
 public class Person {
     private int id;
+    @NonNull
     private String name;
+    @NonNull
     private LocalDate birthDate;
+    @NonNull
     private PersonEntity parent1;
+    @NonNull
     private PersonEntity parent2;
+    @NonNull
     private List<Person> children;
 
     private Person partner;
