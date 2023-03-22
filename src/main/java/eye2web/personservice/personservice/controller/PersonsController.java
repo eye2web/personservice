@@ -1,5 +1,6 @@
 package eye2web.personservice.personservice.controller;
 
+import eye2web.personservice.personservice.model.request.PersonRequest;
 import eye2web.personservice.personservice.model.response.PersonResponse;
 import eye2web.personservice.personservice.service.PersonService;
 import eye2web.personservice.personservice.util.Base64Utils;
@@ -7,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,6 +23,28 @@ public class PersonsController {
     private final ModelMapper modelMapper;
 
     @GetMapping
+    public ResponseEntity<List<PersonResponse>> getPersonList(@RequestParam(required = false) final String sort,
+                                                              @RequestParam(required = false) final String direction) {
+
+        final List<PersonResponse> personResponseList;
+
+        if (Objects.nonNull(sort) && Objects.nonNull(direction)) {
+            personResponseList = personService.getAllPersons(direction, sort)
+                    .stream()
+                    .map(result -> modelMapper.map(result, PersonResponse.class)).
+                    collect(Collectors.toList());
+        } else {
+            personResponseList = personService.getAllPersons()
+                    .stream()
+                    .map(result -> modelMapper.map(result, PersonResponse.class)).
+                    collect(Collectors.toList());
+        }
+
+        return ResponseEntity.ok(personResponseList);
+    }
+
+
+    @GetMapping("/filtered")
     public ResponseEntity<List<PersonResponse>> getPersonListFiltered() {
         final var personResponseList = personService.getPersonsWith3ChildrenOneBelowAge18()
                 .stream()
@@ -40,19 +65,20 @@ public class PersonsController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonResponse> createPerson() {
+    public ResponseEntity<PersonResponse> createPerson(@RequestBody @Validated final PersonRequest personRequest) {
 
         throw new NotYetImplementedException();
     }
 
-    @PutMapping
-    public ResponseEntity<PersonResponse> updatePerson() {
+    @PutMapping("/{id}")
+    public ResponseEntity<PersonResponse> updatePerson(@RequestBody @Validated final PersonRequest personRequest,
+                                                       @PathVariable final int id) {
 
         throw new NotYetImplementedException();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deletePerson() {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePerson(@PathVariable final int id) {
 
         throw new NotYetImplementedException();
     }

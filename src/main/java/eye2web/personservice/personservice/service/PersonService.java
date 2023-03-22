@@ -3,8 +3,10 @@ package eye2web.personservice.personservice.service;
 import eye2web.personservice.personservice.model.Person;
 import eye2web.personservice.personservice.model.dao.PersonEntity;
 import eye2web.personservice.personservice.repository.PersonRepository;
+import eye2web.personservice.personservice.service.exception.IllegalQueryParameterValue;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,25 @@ public class PersonService {
                         person.getChildren().size() == 3 &&
                                 person.getChildren().stream().anyMatch(child -> getAge(child.getBirthDate()) < 18)
                 ).stream().toList();
+    }
+
+    public List<Person> getAllPersons() {
+
+        return Streamable.of(personRepository.findAll())
+                .stream().map(personEntity -> modelMapper.map(personEntity, Person.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<Person> getAllPersons(final String direction, final String field) {
+
+        try {
+            final var sort = Sort.by(Sort.Direction.fromString(direction), field);
+            return personRepository.findAll(sort)
+                    .stream().map(personEntity -> modelMapper.map(personEntity, Person.class))
+                    .collect(Collectors.toList());
+        } catch (final IllegalArgumentException ex) {
+            throw new IllegalQueryParameterValue("Direction query parameter should contain asc or desc");
+        }
     }
 
     public String convertToCSV(final List<Person> personList) {

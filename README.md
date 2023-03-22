@@ -28,5 +28,15 @@ As base64 encoded CSV
 As JSON
 
 ```bash
- GET http://localhost:8080/api/v1/persons
+ GET http://localhost:8080/api/v1/persons/filtered
+```
+
+Get a list of all available persons. Sorting is optional
+
+```bash
+GET http://localhost:8080/api/v1/persons?sort=id&direction=desc
+```
+
+```bash
+GET http://localhost:8080/api/v1/persons
 ```
