@@ -22,7 +22,7 @@ below 18
 As base64 encoded CSV
 
 ```bash
- GET http://localhost:8080/api/v1/persons/csv
+ GET http://localhost:8080/api/v1/persons/filtered/csv
 ```
 
 As JSON

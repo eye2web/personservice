@@ -57,7 +57,7 @@ public class PersonsController {
     /*
         Todo Nicer to use with content-type/application-csv instead of /csv endpoint
      */
-    @GetMapping("/csv")
+    @GetMapping("/filtered/csv")
     public ResponseEntity<String> getPersonListAsBas64CSV() {
         final var personList = personService.getPersonsWith3ChildrenOneBelowAge18();
         final var csv = personService.convertToCSV(personList);
