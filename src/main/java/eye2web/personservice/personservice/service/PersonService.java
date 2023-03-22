@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +34,20 @@ public class PersonService {
                         person.getChildren().size() == 3 &&
                                 person.getChildren().stream().anyMatch(child -> getAge(child.getBirthDate()) < 18)
                 ).stream().toList();
+    }
+
+    public String convertToCSV(final List<Person> personList) {
+
+        final var headers = "id;name;birthday;parent1_id;parent1_name;parent2_id;parent2_name;partner_id;partner_name;child1_id;child1_name;child2_id;child2_name;child3_id;child3_name";
+
+        final var strBuilder = new StringBuilder();
+        strBuilder.append(headers);
+        strBuilder.append(System.lineSeparator());
+        personList.stream()
+                .map(this::toCSVRow)
+                .forEach(strBuilder::append);
+
+        return strBuilder.toString();
     }
 
     private Person toPerson(final PersonEntity personEntity) {
@@ -68,5 +83,31 @@ public class PersonService {
 
     private int getAge(final LocalDate birthDate) {
         return Period.between(birthDate, LocalDate.now()).getYears();
+    }
+
+    private String toCSVRow(final Person person) {
+        var rowBuilder = new StringBuilder();
+        final var parentRow = String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;",
+                person.getId(),
+                person.getName(),
+                person.getBirthDate().format(DateTimeFormatter.BASIC_ISO_DATE),
+                person.getParent1().getId(),
+                person.getParent1().getName(),
+                person.getParent2().getId(),
+                person.getParent2().getName(),
+                person.getPartner().map(partner -> String.valueOf(partner.getId())).orElse(""),
+                person.getPartner().map(Person::getName).orElse("")
+        );
+
+        final var childrenRowOpt = person.getChildren().stream().map(child ->
+                String.format("%s;%s;", child.getId(), child.getName())
+        ).reduce((identity, accumulator) ->
+                identity += accumulator
+        );
+
+        rowBuilder.append(parentRow);
+        childrenRowOpt.ifPresent((childrenRow -> rowBuilder.append(childrenRow, 0, childrenRow.length() - 1)));
+        rowBuilder.append(System.lineSeparator());
+        return rowBuilder.toString();
     }
 }
