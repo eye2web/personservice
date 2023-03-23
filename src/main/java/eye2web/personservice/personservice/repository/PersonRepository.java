@@ -12,5 +12,7 @@ public interface PersonRepository extends CrudRepository<PersonEntity, Integer> 
 
     List<PersonEntity> findByParent1AndParent2(final PersonEntity parent1, final PersonEntity parent2);
 
+    List<PersonEntity> findByParent1OrParent2(final PersonEntity parent1, final PersonEntity parent2);
+
     List<PersonEntity> findAll(final Sort sort);
 }

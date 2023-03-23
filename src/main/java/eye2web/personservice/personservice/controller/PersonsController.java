@@ -28,8 +28,10 @@ public class PersonsController {
 
         final List<PersonResponse> personResponseList;
 
-        if (Objects.nonNull(sort) && Objects.nonNull(direction)) {
-            personResponseList = personService.getAllPersons(direction, sort)
+        if (Objects.nonNull(sort)) {
+            final var sortDirection = Objects.isNull(direction) ? "asc" : direction;
+
+            personResponseList = personService.getAllPersons(sortDirection, sort)
                     .stream()
                     .map(result -> modelMapper.map(result, PersonResponse.class)).
                     collect(Collectors.toList());

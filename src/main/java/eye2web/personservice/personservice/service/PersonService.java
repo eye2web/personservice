@@ -41,7 +41,7 @@ public class PersonService {
     public List<Person> getAllPersons() {
 
         return Streamable.of(personRepository.findAll())
-                .stream().map(personEntity -> modelMapper.map(personEntity, Person.class))
+                .stream().map(this::toPerson)
                 .collect(Collectors.toList());
     }
 
@@ -50,7 +50,7 @@ public class PersonService {
         try {
             final var sort = Sort.by(Sort.Direction.fromString(direction), field);
             return personRepository.findAll(sort)
-                    .stream().map(personEntity -> modelMapper.map(personEntity, Person.class))
+                    .stream().map(this::toPerson)
                     .collect(Collectors.toList());
         } catch (final IllegalArgumentException ex) {
             throw new IllegalQueryParameterValue("Direction query parameter should contain asc or desc");
@@ -72,17 +72,9 @@ public class PersonService {
     }
 
     private Person toPerson(final PersonEntity personEntity) {
-        final var childEntities = mergeLists(
-                personRepository.findByParent1AndParent2(personEntity, personEntity.getPartner().get()),
-                personRepository.findByParent1AndParent2(personEntity.getPartner().get(), personEntity)
-        );
-
-        final var children = childEntities.stream()
-                .map(childEntity -> modelMapper.map(childEntity, Person.class))
-                .collect(Collectors.toList());
 
         final var parent = modelMapper.map(personEntity, Person.class);
-        parent.setChildren(children);
+        parent.setChildren(getChildrenForPerson(personEntity));
         parent.setPartner(
                 personEntity.getPartner()
                         .map(partner -> modelMapper.map(partner, Person.class))
@@ -90,6 +82,21 @@ public class PersonService {
         );
 
         return parent;
+    }
+
+    private List<Person> getChildrenForPerson(final PersonEntity personEntity) {
+        final var childEntities = personEntity.getPartner().map(partner ->
+                mergeLists(
+                        personRepository.findByParent1AndParent2(personEntity, partner),
+                        personRepository.findByParent1AndParent2(partner, personEntity)
+                )
+        ).orElseGet(() ->
+                personRepository.findByParent1OrParent2(personEntity, personEntity)
+        );
+
+        return childEntities.stream()
+                .map(childEntity -> modelMapper.map(childEntity, Person.class))
+                .collect(Collectors.toList());
     }
 
     /*
